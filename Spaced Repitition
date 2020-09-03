@@ -1,0 +1,81 @@
+"""
+Spaced Repitition is a structured way to revise learned topics at a recommended interval for better retaining and recollecting
+This script creates Google Calendar events of topics to revise each day
+Create a google doc and name it "daily", here we can create a list of what we learned on a particular day, this doc will clear at the end of every day
+Create another google doc and name it "master_sr", here each day's list from "daily" is added, this acts as a document that tracks what we learned each day over a period of time
+Initiate the document id's of daily.doc and master_sr.doc to doc_id and master_id
+'space' variable is an array of number of days after which to revise a topic
+Modify the 'space' variable to your desired number of days you want to revise at
+Check out https://en.wikipedia.org/wiki/Spaced_repetition for more info on Spaced Repitition
+
+How to deploy this script
+1. Go to https://script.google.com/home
+2. Click on "New Project"
+3. Clear the default code and paste this code
+4. Rename and save
+5. In projects home page click on 3 vertical dots icon of this project
+6. Click on "Triggers"
+7. Click on "Add Trigger"
+8. Apply these settings
+    In "Choose which function to run" select "myFunction"
+    In "Which runs at deployment" select "Head"
+    In "Select event source" select "Time-driven"
+    In "Select type of time based trigger" select "Day timer"
+    In "Select time of day" select 3am to 4am, this is the time at which the script runs
+6. A prompt appears requesting access to google account, grant the permissions.
+"""
+
+var doc_id = " " // document id of daily.doc
+var master_id = " "   // document id of master_sr.doc 
+var space = [0, 3, 7, 15, 30, 60, 90, 180, 270, 360] // the interval at which you want to revise
+
+function myFunction() { 
+  var daily_doc = DocumentApp.openById(doc_id) 
+  var daily_content = daily_doc.getBody()
+  var daily_recall = daily_content.getText()
+  if (daily_recall != ""){
+  save_to_master(daily_recall)
+  clear_daily_doc(daily_doc)  
+  create_events(daily_recall)
+  }
+}
+
+
+function clear_daily_doc(daily_doc){
+  var daily_content = daily_doc.getBody()
+  daily_doc.appendParagraph(" ") //Can't remove the last paragraph error
+  while (daily_content.getNumChildren() > 1) daily_content.removeChild( daily_content.getChild( 0 ) )
+  // workaroud for "Can't remove the last paragraph" error
+    }
+
+
+function save_to_master(content){
+  var master_doc = DocumentApp.openById(master_id) // master_sr.doc
+  var d = new Date()
+  master_doc.appendParagraph(String(d))
+  master_doc.appendParagraph(content)
+  // master_doc.appendPageBreak()
+  master_doc.appendParagraph(" ")
+  master_doc.saveAndClose()
+}
+
+
+function create_events(content){
+  for (var i = 0; i < space.length; i++ ){
+    var event_start = new Date()
+    event_start.setDate(event_start.getDate() + space[i])
+    event_start.setHours(5)
+    event_start.setMinutes(0)
+    var event_end = new Date()    
+    event_end.setDate(event_end.getDate() + space[i])
+    event_end.setHours(event_start.getHours() + 6)
+    event_end.setMinutes(0)
+                      
+    var event = CalendarApp.getDefaultCalendar().createEvent("recall", event_start, event_end)
+    event.setDescription(content)
+    event.setColor(11)
+    event.addPopupReminder(1)
+  }
+ }
+
+
