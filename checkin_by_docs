@@ -1,0 +1,67 @@
+// weekly trigger on "weekly" function at 6pm every Saturday
+// others trigger at 6pm on Sunday
+
+
+var ci_weekly = "<document id of weekly document>"
+var ci_weekly_questions = "<document id of weekly questions document>"
+var ci_master = "<document id of master checkin document>"
+var now = new Date()
+
+function copyQuestions(source, dest) {
+  var text = source.getBody().getText()
+  dest.setText(text)
+}
+
+function clearDoc(doc){
+  var cont = doc.getBody()
+  doc.appendParagraph(" ") //Can't remove the last paragraph error
+  while (cont.getNumChildren() > 1) cont.removeChild( cont.getChild( 0 ) )
+  // workaroud for "Can't remove the last paragraph" error
+
+}
+
+function appendDocs(source, dest){
+  var text = source.getBody().getText()
+  dest.appendParagraph(" ")
+  dest.appendParagraph(now.toString())
+  dest.appendParagraph(text)
+
+}
+
+function createEvent(doc, title){
+  var end = new Date()
+  end.setHours(now.getHours() + 5)
+  var event = CalendarApp.getDefaultCalendar().createEvent(title, now, end)
+  var link = doc.getUrl()
+  // var link = "https://docs.google.com/document/d/" + doc_id + "/edit"
+  event.setDescription(link)
+  event.setColor(6)
+  event.addPopupReminder(1)
+
+}
+
+
+function weekly(){
+  var ci_weekly_doc = DocumentApp.openById(ci_weekly)
+  var ci_master_doc = DocumentApp.openById(ci_master)
+  var ci_weekly_questions_doc = DocumentApp.openById(ci_weekly_questions)
+  
+  appendDocs(ci_weekly_doc, ci_master_doc)
+  clearDoc(ci_weekly_doc)
+  copyQuestions(ci_weekly_questions_doc, ci_weekly_doc)
+  createEvent(ci_weekly_doc, "Weekly CI")
+}
+
+
+function threeMonthly(){
+  
+}
+
+function sixMonthly(){
+  
+}
+
+function yearly(){
+  //  maybe on 12-12
+}
+
