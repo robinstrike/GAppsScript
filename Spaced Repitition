@@ -33,7 +33,7 @@ function myFunction() {
   var daily_doc = DocumentApp.openById(doc_id) 
   var daily_content = daily_doc.getBody()
   var daily_recall = daily_content.getText()
-  if (daily_recall != ""){
+  if (daily_recall != " "){
   save_to_master(daily_recall)
   clear_daily_doc(daily_doc)  
   create_events(daily_recall)
